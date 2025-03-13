@@ -1,0 +1,10 @@
+web_ui: enable-for-all
+
+listen_addresses: '0.0.0.0:8080'
+
+pmtiles:
+  sources:
+    pad: https://manoomin-pmtiles.s3.us-east-2.amazonaws.com/pad.pmtiles
+    ct: https://manoomin-pmtiles.s3.us-east-2.amazonaws.com/cededTerritory.pmtiles
+    streams: https://manoomin-pmtiles.s3.us-east-2.amazonaws.com/streams.pmtiles
+    waterbodies: https://manoomin-pmtiles.s3.us-east-2.amazonaws.com/waterbodies.pmtiles

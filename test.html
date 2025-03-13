@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manoomin</title>
+
+    <!-- Link to custom CSS -->
+    <link rel="stylesheet" href="styles2.css" />
+
+    <!-- Link to MapLibre GL JS CSS -->
+    <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
+
+    <style>
+        /* Set height for the map container */
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #controls div {
+            margin-bottom: 5px;
+        }
+
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="controls"> <!-- Controls for toggling layers and adjusting opacity and ... -->
+    <div>
+        <input type="checkbox" id="togglePad" checked />
+        <label for="togglePad">Pad Layer</label><br />
+        <label for="padOpacity">Opacity:</label>
+        <input type="range" id="padOpacity" min="0" max="1" step="0.1" value="0.5" />
+    </div>
+    <div>
+      <input type="checkbox" id="toggleWaterBodies" checked />
+      <label for="toggleWaterBodies">Water Bodies</label><br />
+      <label for="waterBodiesOpacity">Opacity:</label>
+      <input type="range" id="waterBodiesOpacity" min="0" max="1" step="0.1" value="0.5" />
+    </div>
+    <div>
+      <input type="checkbox" id="toggleRiversStreams" checked />
+      <label for="toggleRiversStreams">Rivers and Streams</label><br />
+      <label for="riversStreamsOpacity">Opacity:</label>
+      <input type="range" id="riversStreamsOpacity" min="0" max="1" step="0.1" value="0.5" />
+    </div>
+    <div>
+      <input type="checkbox" id="toggleCededTerritories" checked />
+      <label for="toggleCededTerritories">Ceded Territories</label><br />
+    </div>
+</div>
+
+
+<!-- MapLibre GL JS library -->
+<script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+<!-- Mapbox GL Draw library -->
+<script src="https://www.unpkg.com/@mapbox/mapbox-gl-draw@1.5.0/dist/mapbox-gl-draw.js"></script>
+<link rel="stylesheet" href="https://www.unpkg.com/@mapbox/mapbox-gl-draw@1.5.0/dist/mapbox-gl-draw.css"/>
+
+<script>
+
+    const bgStyle = {
+        version: 8,
+        sources: {},
+        layers: [
+            {
+                id: 'background',
+                type: 'background',
+                paint: {
+                    'background-color': '#f8f4f0'
+                }
+            }
+        ]
+    };
+
+    MapboxDraw.constants.classes.CONTROL_BASE  = 'maplibregl-ctrl'; //these are needed as a workaround
+    MapboxDraw.constants.classes.CONTROL_PREFIX = 'maplibregl-ctrl-'; //to make mapbox-draw classes readable by maplibre
+    MapboxDraw.constants.classes.CONTROL_GROUP = 'maplibregl-ctrl-group'; //or something like that. See issue #2601 in maplibre-gl-js repo
+
+    const map = new maplibregl.Map({
+        container: 'map',
+        style: bgStyle,
+        center: [-93, 44],
+        zoom: 5
+    });
+
+    // Add vector tile source from Martin after the map loads
+    map.on('load', function () {
+        map.addSource('esri-imagery', {
+            type: 'raster',
+            tiles: [
+                'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            ],
+            tileSize: 256
+        });
+
+        map.addSource('streams', {
+           type: 'vector',
+           tiles: ['https://martin-serv-dev-247449275512.us-central1.run.app/streams/{z}/{x}/{y}'],
+        });
+
+        map.addSource('waterbodies', {
+            type: 'vector',
+            tiles: ['https://martin-serv-dev-247449275512.us-central1.run.app/waterbodies/{z}/{x}/{y}'],
+        });
+
+        map.addSource('pad', {
+            type: 'vector',
+            tiles: ['https://martin-serv-dev-247449275512.us-central1.run.app/pad/{z}/{x}/{y}'],
+        });
+
+        map.addSource('ct', {
+            type: 'vector',
+            tiles: ['https://martin-serv-dev-247449275512.us-central1.run.app/ct/{z}/{x}/{y}'],
+        })
+
+        map.addLayer({
+            id: 'esri-imagery-layer',
+            type: 'raster',
+            source: 'esri-imagery',
+        })
+
+        map.addLayer({
+            id: 'streams-layer',
+            type: 'line',
+            source: 'streams',
+            'source-layer': 'streams',
+            paint: {
+                'line-color': '#0000ff'
+            },
+        });
+
+        map.addLayer({
+            id: 'waterbodies-layer',
+            type: 'fill',
+            source: 'waterbodies',
+            'source-layer': 'waterbodies',
+            paint: {
+                'fill-color': '#0000ff'
+            },
+        });
+
+        map.addLayer({
+            id: 'pad-layer',
+            type: 'fill',
+            source: 'pad',
+            'source-layer': 'pad',
+            paint: {
+                'fill-color': [
+                    'match',
+                    ['get', 'Mang_Type'],
+                    'DIST', '#fff723',
+                    'FED', '#00FF00',
+                    'JNT', '#fff723',
+                    'LOC', '#fff723',
+                    'NGO', '#36FFCE',
+                    'PVT', '#36FFCE',
+                    'STAT', '#eb8f43',
+                    'TRIB', '#870204',
+                    'UNK', '#CCCCCC',
+                    '#CCCCCC'
+                ]
+            },
+        });
+
+        map.addLayer({
+            id:'ceded-territories-layer',
+            type: 'line',
+            source: 'ct',
+            'source-layer': 'cededTerritory',
+            paint: {
+                'line-color': '#000000',
+                'line-width': 3
+            }
+        });
+
+
+        map.on('click', 'pad-layer', function (e) {
+            const features = map.queryRenderedFeatures(e.point, {
+                layers: ['pad-layer']
+            });
+            if (!features.length) {
+                return;
+            }
+            const feature = features[0];
+            let popupContent = '<h3>Pad Details</h3>';
+            for (const key in feature.properties) {
+                popupContent += `<strong>${key}:</strong> ${feature.properties[key]}<br>`;
+            }
+            new maplibregl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML(popupContent)
+                .addTo(map);
+        });
+
+        const draw = new MapboxDraw({
+            displayControlsDefault: false,
+            controls: {
+                polygon: true,
+                trash: true
+            }
+        });
+        map.addControl(draw); //this is a problem i think- this is mapbox code that probably needs converted to maplibre
+    });
+
+    //utilities
+    function setLayerVisibility(layerId, visible) {
+        map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+    }
+
+    document.getElementById('togglePad').addEventListener('change', function(e) {
+      setLayerVisibility('pad-layer', this.checked);
+    });
+
+    document.getElementById('padOpacity').addEventListener('input', function(e) {
+      map.setPaintProperty('pad-layer', 'fill-opacity', parseFloat(this.value));
+    });
+
+    document.getElementById('toggleWaterBodies').addEventListener('change', function(e) {
+      setLayerVisibility('waterbodies-layer', this.checked);
+    });
+
+    document.getElementById('waterBodiesOpacity').addEventListener('input', function(e) {
+      map.setPaintProperty('waterbodies-layer', 'fill-opacity', parseFloat(this.value));
+    });
+
+    document.getElementById('toggleRiversStreams').addEventListener('change', function(e) {
+      setLayerVisibility('streams-layer', this.checked);
+    });
+
+    document.getElementById('riversStreamsOpacity').addEventListener('input', function(e) {
+      map.setPaintProperty('streams-layer', 'line-opacity', parseFloat(this.value));
+    });
+
+    document.getElementById('toggleCededTerritories').addEventListener('change', function(e) {
+      setLayerVisibility('ceded-territories-layer', this.checked);
+    });
+
+</script>
+
+</body>
+</html>
