@@ -34,6 +34,7 @@
 </head>
 <body>
 <div id="map"></div>
+
 <div id="controls"> <!-- Controls for toggling layers and adjusting opacity and ... -->
     <div>
         <input type="checkbox" id="togglePad" checked />
@@ -58,6 +59,17 @@
         <label for="toggleCededTerritories">Ceded Territories</label><br />
     </div>
 </div>
+
+<div id="attributeForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name"><br><br>
+
+    <label for="description">Description:</label><br>
+    <input type="text" id="description" name="description"><br><br>
+
+    <button id="saveAttributes">Save Attributes</button>
+</div>
+
 
 <script src="dist/bundle.js"></script>
 

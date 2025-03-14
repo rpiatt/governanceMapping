@@ -141,3 +141,47 @@ input[type="range"]::-ms-thumb {
   cursor: pointer;
   border: none;
 }
+
+/* Style for the attribute input form */
+#attributeForm {
+  display: none; /* Hidden by default; shown via JS */
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10000; /* Ensure it's on top of map controls */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  max-width: 300px;
+  font-family: Arial, sans-serif;
+}
+
+/* Optional: Style form elements inside the attribute form */
+#attributeForm label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+#attributeForm input[type="text"] {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+
+#attributeForm button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+#attributeForm button:hover {
+  background-color: #0056b3;
+}

@@ -123,7 +123,7 @@ map.on('load', function () {
     });
 
     map.addControl(Draw);
-
+    let featuresWithAttributes = [];
 });
 
 map.on('click', 'pad-layer', function (e) {
@@ -152,6 +152,25 @@ map.on('draw.modechange', (e) => {
     }
 });
 
+map.on('draw.create', (e) => {
+    const feature = e.features[0];
+
+    document.getElementById('attributeForm').style.display = 'block';
+
+    document.getElementById('saveAttributes').onclick = function () {
+        const name = document.getElementById('name').value;
+        const description = document.getElementById('description').value;
+
+        feature.properties = {
+            name: name,
+            description: description
+        };
+
+        document.getElementById('attributeForm').style.display = 'none';
+
+        featuresWithAttributes.push(feature);
+    };
+});
 
 //utilities
 function setLayerVisibility(layerId, visible) {
