@@ -144,6 +144,13 @@ map.on('click', 'pad-layer', function (e) {
         .addTo(map);
 });
 
+map.on('draw.modechange', (e) => {
+    if (e.mode === 'simple_select') {
+        map.dragPan.enable(); // Re-enable panning when not drawing
+    } else {
+        map.dragPan.disable(); // Disable panning when drawing
+    }
+});
 
 
 //utilities
