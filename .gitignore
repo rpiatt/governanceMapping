@@ -3,3 +3,4 @@
 .log
 .Rhistory
 node_modules
+dist/bundle.js.LICENSE.txt

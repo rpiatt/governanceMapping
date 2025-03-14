@@ -1,6 +1,8 @@
 import maplibregl from 'maplibre-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import FreehandMode from 'mapbox-gl-draw-freehand-mode';
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
+
 
 // Fix MapboxDraw classes for MapLibre
 MapboxDraw.constants.classes.CONTROL_BASE  = 'maplibregl-ctrl';
