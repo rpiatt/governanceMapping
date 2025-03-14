@@ -1,0 +1,30 @@
+diff --git a/node_modules/mapbox-gl-draw-freehand-mode/src/index.js b/node_modules/mapbox-gl-draw-freehand-mode/src/index.js
+index 7af9ee5..bffc747 100644
+--- a/node_modules/mapbox-gl-draw-freehand-mode/src/index.js
++++ b/node_modules/mapbox-gl-draw-freehand-mode/src/index.js
+@@ -1,8 +1,22 @@
+-import DrawPolygon from '@mapbox/mapbox-gl-draw/src/modes/draw_polygon';
+-import {geojsonTypes, cursors, types, updateActions, modes, events} from '@mapbox/mapbox-gl-draw/src/constants';
++//custom patch see issue #25 on https://github.com/bemky/mapbox-gl-draw-freehand-mode/issues/25
++
++// import DrawPolygon from '@mapbox/mapbox-gl-draw/src/modes/draw_polygon'; //custom patch
++// import {geojsonTypes, cursors, types, updateActions, modes, events} from '@mapbox/mapbox-gl-draw/src/constants';
++import MapboxGlDraw from '@mapbox/mapbox-gl-draw';
+ import simplify from "@turf/simplify";
+ 
+-const FreehandMode = Object.assign({}, DrawPolygon)
++// const FreehandMode = Object.assign({}, DrawPolygon)
++
++const {
++    geojsonTypes,
++    cursors,
++    types,
++    updateActions,
++    modes,
++    events,
++} = MapboxGlDraw.constants;
++
++const FreehandMode = Object.assign({}, MapboxGlDraw.modes.draw_polygon);
+ 
+ FreehandMode.onSetup = function() {
+     const polygon = this.newFeature({
