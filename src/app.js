@@ -2,6 +2,7 @@ import maplibregl from 'maplibre-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import FreehandMode from 'mapbox-gl-draw-freehand-mode';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
+import shpwrite from '@mapbox/shp-write';
 
 
 // Fix MapboxDraw classes for MapLibre
@@ -123,7 +124,6 @@ map.on('load', function () {
     });
 
     map.addControl(Draw);
-    let featuresWithAttributes = [];
 });
 
 map.on('click', 'pad-layer', function (e) {
@@ -143,6 +143,17 @@ map.on('click', 'pad-layer', function (e) {
         .setHTML(popupContent)
         .addTo(map);
 });
+
+const featuresWithAttributes = [];
+
+const exportButton = document.createElement("button");
+exportButton.innerText = "Export to Shapefile";
+exportButton.style.position = 'absolute';
+exportButton.style.top = '18px';
+exportButton.style.right = '60px';
+exportButton.style.zIndex = '10000';
+exportButton.onclick = exportToShapefile;
+document.body.appendChild(exportButton);
 
 map.on('draw.modechange', (e) => {
     if (e.mode === 'simple_select') {
@@ -204,3 +215,73 @@ document.getElementById('riversStreamsOpacity').addEventListener('input', functi
 document.getElementById('toggleCededTerritories').addEventListener('change', function(e) {
   setLayerVisibility('ceded-territories-layer', this.checked);
 });
+
+function base64ToArrayBuffer(base64) {
+    const binaryString = window.atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+
+async function exportToShapefile() {
+    const data = Draw.getAll();
+    console.log("Drawn Features:", JSON.stringify(data, null, 2)); //log features to console on export attempt
+
+    if (data.features.length === 0) {
+        alert('No features to export');
+        return;
+    }
+    // const options = {
+    //     folder: 'drawnFeatures',
+    //     types: {
+    //         polygon: 'polygon',
+    //         polyline: 'line',
+    //         Point: 'point'
+    //     }
+    // };
+
+    try {
+        //shpwrite may be returning a base64 string, so may need to rewrite var names below
+        const result = await shpwrite.zip(data);
+        //console.log("Shapefile ArrayBuffer:", arrayBuffer); //log shpwrite output to console
+        //console.log(arrayBuffer.byteLength);
+        console.log("Result type:", Object.prototype.toString.call(result));
+
+        let arrayBuffer;
+        if (typeof result === 'string') {
+            arrayBuffer = base64ToArrayBuffer(result);
+        } else {
+            arrayBuffer = result;
+        }
+
+        if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+            alert("Failed to create shapefile archive.");
+            return;
+        }
+
+        const uint8Array = new Uint8Array(arrayBuffer);
+        console.log("Uint8Array length:", uint8Array.length);
+        console.log("First few bytes of Uint8Array:", uint8Array.slice(0, 10));
+
+        const blob = new Blob([uint8Array], { type: "application/zip" });
+        //const blob = new Blob([new Uint8Array(arrayBuffer)], {type: 'application/zip'}); //breaking into parts for error checking
+        console.log("Blob size:", blob.size);
+        console.log("Blob type:", blob.type);
+
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'drawnFeatures.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error exporting to shapefile:', error);
+        alert('Failed to export to shapefile.');
+    }
+}
