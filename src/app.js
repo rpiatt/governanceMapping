@@ -172,12 +172,10 @@ map.on('draw.create', (e) => {
     document.getElementById('attributeForm').style.display = 'block';
 
     document.getElementById('saveAttributes').onclick = function () {
-        const name = document.getElementById('name').value;
-        const description = document.getElementById('description').value;
+        const notes = document.getElementById('notes').value;
 
         feature.properties = {
-            name: name,
-            description: description
+            Notes: notes
         };
 
         document.getElementById('attributeForm').style.display = 'none';
@@ -230,7 +228,11 @@ function base64ToArrayBuffer(base64) {
 }
 
 async function exportToShapefile() {
-    const data = Draw.getAll();
+    const data = {
+        type: 'FeatureCollection',
+        features: featuresWithAttributes
+    };
+
     console.log("Drawn Features:", JSON.stringify(data, null, 2)); //log features to console on export attempt
 
     if (data.features.length === 0) {
