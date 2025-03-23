@@ -16,5 +16,8 @@ module.exports = {
   },
   devServer: {
     static: './dist',
+    watchFiles: ['src/**/*.js'],
+    hot: true
   },
+  devtool: 'source-map'
 };

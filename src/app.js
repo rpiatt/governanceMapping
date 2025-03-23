@@ -3,7 +3,9 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import FreehandMode from 'mapbox-gl-draw-freehand-mode';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import shpwrite from '@mapbox/shp-write';
+import { drawStyles } from './drawStyles';
 
+//console.log('Draw styles:', drawStyles); // Debug log
 
 // Fix MapboxDraw classes for MapLibre
 MapboxDraw.constants.classes.CONTROL_BASE  = 'maplibregl-ctrl';
@@ -13,7 +15,8 @@ MapboxDraw.constants.classes.CONTROL_GROUP  = 'maplibregl-ctrl-group';
 const Draw = new MapboxDraw({
     modes: Object.assign(MapboxDraw.modes, {
         draw_polygon: FreehandMode
-    })
+    }),
+    styles: drawStyles
 });
 
 // Initialize map
