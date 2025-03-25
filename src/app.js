@@ -168,6 +168,7 @@ map.on('draw.modechange', (e) => {
 
 map.on('draw.create', (e) => {
     const feature = e.features[0];
+    console.log('New feature created:', feature);
 
     document.getElementById('attributeForm').style.display = 'block';
 
@@ -181,8 +182,58 @@ map.on('draw.create', (e) => {
         document.getElementById('attributeForm').style.display = 'none';
 
         featuresWithAttributes.push(feature);
+        console.log('Features with attributes:', featuresWithAttributes);
     };
 });
+
+map.on('click', function(e) {
+    console.log(map.getStyle().layers);
+
+    const features = map.queryRenderedFeatures(e.point, {
+        layers: ['gl-draw-polygon-fill.hot', 'gl-draw-polygon-fill.cold']
+    });
+    console.log('Clicked features:', features);
+
+    if (!features.length) return;
+    const selectedFeature = features[0];
+    console.log('Clicked feature:', selectedFeature);
+
+    const savedFeature = featuresWithAttributes.find(f => f.id === selectedFeature.properties.id);
+    console.log('Saved feature:', savedFeature);
+    if (!savedFeature) {
+        console.log('No matching saved feature found');
+        return;
+    }
+
+    const popup = new maplibregl.Popup({offset: 25})
+        .setLngLat(e.lngLat)
+        .setHTML('<button id="editNotes">Edit notes</button>')
+        .addTo(map);
+
+    const popupElement = popup.getElement();
+    const editButton = popupElement.querySelector('#editNotes');
+    if (editButton) {
+        editButton.addEventListener('click', () => {
+            popup.remove();
+
+            const attributeForm = document.getElementById('attributeForm');
+            const notesInput = document.getElementById('notes');
+
+            notesInput.value = savedFeature.properties.Notes || '';
+            attributeForm.style.display = 'block';
+
+            document.getElementById('saveAttributes').onclick = function () {
+                const newNotes = notesInput.value;
+                savedFeature.properties.Notes = newNotes;
+
+                //update feature in Draw?
+
+                attributeForm.style.display = 'none';
+            };
+        });
+    }
+});
+
 
 //utilities
 function setLayerVisibility(layerId, visible) {
